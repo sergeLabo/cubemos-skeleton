@@ -1,6 +1,7 @@
 # Geany
 *.geany
 *.geanywb
+*.geanyprj
 
 # divers
 old/
