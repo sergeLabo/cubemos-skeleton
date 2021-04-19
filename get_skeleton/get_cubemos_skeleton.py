@@ -10,8 +10,9 @@ from gestures import Gestures
 from osc_client import OscClt
 
 import pyrealsense2 as rs
+
+# Script particulier de cubemos dans le dossier de ce projet avec la clé !!
 from skeletontracker import skeletontracker
-# Script particulier de cubemos dans le dossier  avec la clé !!
 import util as cm
 
 
@@ -30,11 +31,11 @@ class CubemosSkeleton:
         if self.gest:
             self.gestures = Gestures(self.clt)
 
-    def render_ids_3d(self, render_image, skeletons_2d, depth_map,
-                        depth_intrinsic, joint_confidence):
+    def render_ids_3d(self, color_image, skeletons_2d, depth_map,
+                            depth_intrinsic, joint_confidence):
+        """Calcul les coordonnées 3D des squelettes."""
 
-        thickness = 1
-        rows, cols, channel = render_image.shape[:3]
+        rows, cols, channel = color_image.shape[:3]
         # kernel = distance_kernel_size
         kernel = 5
         joints_2D = 0
@@ -45,7 +46,7 @@ class CubemosSkeleton:
         for skeleton_index in range(len(skeletons_2d)):
             skeleton_2D = skeletons_2d[skeleton_index]
             joints_2D = skeleton_2D.joints
-            did_once = False
+            skeleton_id = skeleton_2D.id
 
             for joint_index in range(len(joints_2D)):
                 # check if the joint was detected and has valid coordinate
@@ -73,10 +74,9 @@ class CubemosSkeleton:
                                                                    median_distance)
                         points_3D[joint_index] = point_3d
 
-        self.clt.send_global_message(points_3D)
-        self.gestures.add_points(points_3D)
+            self.clt.send_global_message(points_3D, skeleton_id)
+            self.gestures.add_points(points_3D)
 
-        return joints_2D, point_3d
 
     def run(self):
         # Configure depth and color streams of the intel realsense
@@ -147,7 +147,7 @@ class CubemosSkeleton:
 if __name__ == "__main__":
 
     # Chargement de la configuration
-    ini_file = '/media/data/3D/projets/cubemos-skeleton/get_skeleton/get_cubemos_skeleton.ini'
+    ini_file = 'get_cubemos_skeleton.ini'
     my_config = MyConfig(ini_file)
 
     kwargs = my_config.conf['cubemos']

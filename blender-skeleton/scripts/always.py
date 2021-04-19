@@ -180,6 +180,7 @@ def main():
         gl.t = time()
         # #print(int(gl.fps/10))
         gl.fps = 0
+        print("Body n°:", gl.body)
 
     keyboard()
 

@@ -16,8 +16,9 @@ def default_handler(*args):
 
 
 def on_points(*args):
+    # Je récupère le body
+    gl.body = args[-1]
     # J'ôte le body
-    body = args[-1]
     args = args[:-1]
 
     gl.points = get_points(args)
@@ -87,7 +88,7 @@ def main():
     gl.body_visible = 1
     gl.person.visible = 0
 
-    gl.debug = 1  # 1=avec fichier enregistré
+    gl.debug = 0  # 1=avec fichier enregistré
     if gl.debug:
         b = './scripts/json/cap_2021_04_17_13_56.json'
         gl.data = read_json(b)

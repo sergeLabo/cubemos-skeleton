@@ -4,8 +4,14 @@ from datetime import datetime
 from oscpy.client import OSCClient
 
 class OscClt:
-    def __init__(self, ip, port):
+    """Un client OSC spécifique pour envoyer les points Cubemos,
+    et enregistrer ces points dans un fichier pour debug.
+    """
 
+    def __init__(self, ip, port):
+        """ ip = "192.168.1.101"
+            ip = b'localhost'
+        """
         self.ip = ip
         self.port = port
         # Pour l'enregistrement d'un json à la fin de la capture
@@ -40,6 +46,7 @@ class OscClt:
 
     def save(self):
         """Enregistrement des messages envoyés pour debug de la réception"""
+
         dt_now = datetime.now()
         dt = dt_now.strftime("%Y_%m_%d_%H_%M")
         fichier = f"json/cap_{dt}.json"  # dans le home
