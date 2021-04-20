@@ -41,6 +41,24 @@ class OscClt:
         self.all_data.append(msg)
         self.client.send_message(b'/points', msg)
 
+    def send_mutiples_message(self, points3D, bodyId=110):
+        """Envoi d'un message OSC pour chaque point: n = 0 à 17
+        point = [x, y, z]
+        il faudrait une adresse du type
+        /point_{n}_{bodyId}
+        mais je ne sait pas recevoir çà
+        d'où ce mix
+        msg = [bodyId, n, x, y, z]
+        """
+        msg = [bodyId]
+        for point in points3D:
+            if point:
+                n = points3D.index(point)
+                msg.append(n)
+                for i in range(3):
+                    msg.append(point[i])
+                self.client.send_message(b'/point', msg)
+
     def send_msg(self, adress, note):
         self.client.send_message(adress, [note])
 

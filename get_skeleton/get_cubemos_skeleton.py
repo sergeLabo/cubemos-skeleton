@@ -26,6 +26,7 @@ class CubemosSkeleton:
         self.ip = kwargs.get('ip', b'localhost')
         self.port = kwargs.get('port', 8003)
         self.gest = kwargs.get('gestures', 0)
+        self.specific_message = kwargs.get('specific_message', 0)
 
         self.clt = OscClt(self.ip, self.port)
         if self.gest:
@@ -74,9 +75,14 @@ class CubemosSkeleton:
                                                                    median_distance)
                         points_3D[joint_index] = point_3d
 
-            self.clt.send_global_message(points_3D, skeleton_id)
-            self.gestures.add_points(points_3D)
+            # Envoi en OSC
+            if not specific_message:
+                self.clt.send_global_message(points_3D, skeleton_id)
+            else:
+                self.clt.send_mutiples_message(points_3D, skeleton_id)
 
+            # Reconnaissance de gestes
+            self.gestures.add_points(points_3D)
 
     def run(self):
         # Configure depth and color streams of the intel realsense
