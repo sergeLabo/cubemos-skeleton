@@ -2,6 +2,7 @@
 from json import dumps
 from datetime import datetime
 from oscpy.client import OSCClient
+from time import time
 
 class OscClt:
     """Un client OSC spécifique pour envoyer les points Cubemos,
@@ -38,7 +39,7 @@ class OscClt:
 
         # N° body à la fin
         msg.append(bodyId)
-        self.all_data.append(msg)
+        self.all_data.append([msg, time()])
         self.client.send_message(b'/points', msg)
 
     def send_mutiples_message(self, points3D, bodyId=110):

@@ -76,7 +76,7 @@ class CubemosSkeleton:
                         points_3D[joint_index] = point_3d
 
             # Envoi en OSC
-            if not specific_message:
+            if not self.specific_message:
                 self.clt.send_global_message(points_3D, skeleton_id)
             else:
                 self.clt.send_mutiples_message(points_3D, skeleton_id)
