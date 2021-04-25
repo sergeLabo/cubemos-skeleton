@@ -3,13 +3,19 @@ from time import sleep
 from json import load
 import numpy as np
 
-GESTURES_UP  = {0: (13, 10),
-                1: (10, 13),
+GESTURES_UP  = {
                 2: (7, 5),
-                3: (4, 2),
-                4: (4, 3),
-                5: (7, 6),
-                6: (1, 8)}
+                3: (4, 2)
+                }
+
+
+                # #0: (13, 10),
+                # #1: (10, 13),
+                # #2: (7, 5),
+                # #3: (4, 2),
+                # #4: (4, 3),
+                # #5: (7, 6),
+                # #6: (1, 8)}
 
 
 class Gestures:
@@ -23,8 +29,8 @@ class Gestures:
         self.client = client
 
         self.depth = 1
-        self.mini = 50
-        self.maxi = -50
+        self.mini = 0.20
+        self.maxi = 0.90
         self.step = 1  # int de 1 à 5
         # 36 notes possibles
         self.encours = [0] * 36
@@ -52,9 +58,9 @@ class Gestures:
             depth = 1
         # mini maxi
         if depth < self.mini:
-            self.mini = depth
+            self.mini = 0.20  #depth
         if depth > self.maxi:
-            self.maxi = depth
+            self.maxi = 0.80  # depth
 
         self.depth = depth
         self.get_step()
@@ -71,27 +77,28 @@ class Gestures:
         if self.maxi - self.mini != 0:
             pas = (self.maxi - self.mini)/5
             if self.depth is not None:
-                if pas != 0:
-                    self.step = int((self.depth - self.mini)/pas)
-                else:
-                    self.step = 1
+                self.step = (self.depth - self.mini)/pas
 
     def gestures(self):
         """ step 1 --> 0 1 2 3 ... 6
             step 2 --> 7 8 9 10 ... 12
         """
+        k = 0.02  # décalge de keypoints vers le haut
         pts = self.points
         for key, val in GESTURES_UP.items():
             p2 = val[0]
             p1 = val[1]
             if pts[p1] and pts[p2]:
-                note = key + self.step*5
-                if pts[p2][1] > pts[p1][1] + 0.1:
+                note = int(key + self.step*5)
+                if note < 0: note = 0
+                if note > 35: note = 35
+                if pts[p2][2] > pts[p1][2] + k:
                     if not self.encours[note]:
+                        print(round(pts[p2][2], 2), round(pts[p1][2], 2))
                         print("Envoi de:", note)
                         self.client.send_msg(b'/note', note)
                         self.encours[note] = 1
-                if pts[p2][1] < pts[p1][1] - 0.1:
+                if pts[p2][2] < pts[p1][2] - k:
                     self.encours[note] = 0
 
 
@@ -139,13 +146,32 @@ if __name__ == "__main__":
     from osc_client import OscClt
 
     clt = OscClt(b'localhost', 8003)
-
     gest = Gestures(clt)
 
-    fichier = "./json/cap_2021_04_17_13_56.json"
+    # #fichier = "./json/cap_2021_04_22_17_06.json"
+    fichier = "./json/cap_2021_04_22_19_23.json"  # 22940
     data = read_json(fichier)
+    print("Nombre de data:", len(data))
+    for i in range(16300, 20000, 1):
+        # 2021_04_22_17_06 8000 à 12000 rien
+        # 2021_04_22_19_23 20600 à 22000 un peu
+        # 15000 à
+        print(i)
+        # Les points en 3D avec y et z interverti et y inversé
+        points = get_points(data[i][0][:-1])
 
-    for i in range(len(data)):
-        points = get_points(data[i][:-1])
         gest.add_points(points)
+
+        # points =
+        # [None, [-1.535, 5.456, 0.569], None, None, None, [-1.466, 5.388, 0.511],
+        # None, None, None, None, None, None, None, None, None, None, None, None]
+        # send_global_message(self, points3D, bodyId=110):
+        points_inverse = []
+        for point in points:
+            if not point:
+                points_inverse.append(None)
+            else:
+                points_inverse.append([point[0], -point[2], point[1]])
+        clt.send_global_message(points_inverse)
+
         sleep(0.06)

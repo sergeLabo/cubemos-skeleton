@@ -4,6 +4,7 @@ from datetime import datetime
 from oscpy.client import OSCClient
 from time import time
 
+
 class OscClt:
     """Un client OSC spécifique pour envoyer les points Cubemos,
     et enregistrer ces points dans un fichier pour debug.
@@ -39,6 +40,7 @@ class OscClt:
 
         # N° body à la fin
         msg.append(bodyId)
+        # Heure de capture
         self.all_data.append([msg, time()])
         self.client.send_message(b'/points', msg)
 

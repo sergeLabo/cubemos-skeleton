@@ -9,6 +9,7 @@ except:
     print("Vous devez installer scipy !")
     SCIPY = False
 
+
 class Filtre:
     """Filtre les points reçus du RealSense
     piles[17][2] = deque([1.937, -0.495, 0.144, 3.24], maxlen=4)
@@ -101,6 +102,7 @@ def get_points(data):
                 # Permutation de y et z, z est la profondeur pour RS et OpenCV
                 # et inversion de l'axe des y en z
                 points.append([val[0]/1000, val[2]/1000, -val[1]/1000])
+                # #points.append([val[0]/1000, val[1]/1000, val[2]/1000])
     else:
         points = None
 

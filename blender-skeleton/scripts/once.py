@@ -5,7 +5,7 @@ import json
 from oscpy.server import OSCThreadServer
 
 from bge import logic as gl
-from scripts.utils import get_all_objects, add_object, read_json
+from scripts.utils import get_all_objects, add_object
 from scripts.utils import JOINTS, PAIRS_COCO, PAIRS_MPI
 from scripts.rs_utils import Filtre, get_points
 from scripts.sound import EasyAudio
@@ -22,21 +22,21 @@ def on_points(*args):
     args = args[:-1]
 
     gl.points = get_points(args)
-    gl.new = 1
-    # Durée en frame depuis la dernière réception
-    gl.tempo = gl.frame_number - gl.receive_at
-    gl.receive_at = gl.frame_number
 
 
 def on_note(i):
-    print("Play note", i)
+    # #print("Play note", i)
     if gl.notes:
+        if i > 35: i = 35
+        if i < 0: i = 0
         gl.notes[str(i)].play()
 
 
 def osc_server_init():
     gl.server = OSCThreadServer()
     gl.server.listen('0.0.0.0', port=8003, default=True)
+
+
     # Les callbacks du serveur
     gl.server.default_handler = default_handler
     gl.server.bind(b'/points', on_points)
@@ -80,23 +80,12 @@ def main():
     gl.fps = 0
     gl.server = None
     gl.points = None
-    gl.frame_number = 0
-    gl.nums = 0
-    gl.new = 0
-    gl.receive_at = 0
-    gl.tempo = 0
     gl.body_visible = 1
     gl.person.visible = 0
+    gl.body = 0
+    gl.notes = None
 
-    gl.debug = 0  # 1=avec fichier enregistré
-    if gl.debug:
-        b = './scripts/json/cap_2021_04_17_13_56.json'
-        gl.data = read_json(b)
-        print("Nombre de frame =", len(gl.data))
-    else:
-        gl.notes = None
-        osc_server_init()
-    gl.every = 5
+    osc_server_init()
 
     # Le filtre Savonarol Wakowski de scipy
     gl.mode = "COCO" # "MPI" ou "COCO"
@@ -109,9 +98,9 @@ def main():
 
     # Placement et échelle dans la scène
     gl.scale = 1
-    gl.up_down = 1.0
+    gl.up_down = 0.5
     gl.left_right = 0.2
-    gl.av_ar = -0.6
+    gl.av_ar = -2.5
 
     # audio
     get_notes()

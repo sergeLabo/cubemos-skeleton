@@ -3,6 +3,7 @@ import json
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 def read_json(fichier):
     try:
         with open(fichier) as f:
@@ -27,9 +28,9 @@ def get_points(data):
         points = []
         for i in range(nombre):
             # data[de 0 à 54] n'est jamais None car vient de l'OSC
-            val = [ data[(3*i)],
-                    data[(3*i)+1],
-                    data[(3*i)+2]]
+            val = [data[(3*i)],
+                   data[(3*i)+1],
+                   data[(3*i)+2]]
             if val == [-1000000, -1000000, -1000000]:
                 points.append(None)
             else:
@@ -57,6 +58,7 @@ def plot_depht(depths, tops_liss):
     fig.savefig("depth.png")
     plt.show()
 
+
 def get_depth(points):
     """Moyenne de tous les z"""
     zs = []
@@ -73,7 +75,7 @@ def get_depth(points):
 
 if __name__ == '__main__':
 
-    fichier = "cap_2021_04_21_18_27.json"
+    fichier = "./cap_2021_04_22_17_06.json"
     data = read_json(fichier)
     depths = []
     tops = []

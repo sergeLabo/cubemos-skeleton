@@ -154,9 +154,9 @@ if __name__ == "__main__":
 
     # Chargement de la configuration
     ini_file = 'get_cubemos_skeleton.ini'
-    my_config = MyConfig(ini_file)
+    my_conf = MyConfig(ini_file)
 
-    kwargs = my_config.conf['cubemos']
+    kwargs = my_conf.conf['cubemos']
     print("\nDétection de squelette par Cubemos")
     print("\n     Configuration \n")
     pprint(kwargs)

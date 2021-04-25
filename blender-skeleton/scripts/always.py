@@ -45,16 +45,15 @@ def apply_objet_position_orientation(objet_point_1, objet_point_2, objet):
 
 
 def set_sphere_position_scale():
-    if gl.points:
-        for i in range(14):  # gl.nombre):
-            if gl.points[i]:
-                v = Vector(gl.points[i])*gl.scale
-                gl.spheres[i].worldPosition = [ v[0] + gl.left_right,
-                                                v[1] + gl.av_ar,
-                                                v[2] + gl.up_down]
-                gl.spheres[i].worldScale = [1.5*gl.scale,
-                                            1.5*gl.scale,
-                                            1.5*gl.scale]
+    for i in range(14):  # gl.nombre):
+        if gl.points[i]:
+            v = Vector(gl.points[i])*gl.scale
+            gl.spheres[i].worldPosition = [ v[0] + gl.left_right,
+                                            v[1] + gl.av_ar,
+                                            v[2] + gl.up_down]
+            gl.spheres[i].worldScale = [1.5*gl.scale,
+                                        1.5*gl.scale,
+                                        1.5*gl.scale]
 
 
 def set_body_position_orientation():
@@ -146,7 +145,6 @@ def keyboard():
     elif gl.keyboard.events[events.HKEY] == gl.KX_INPUT_JUST_ACTIVATED:
         visible_or_not()
 
-
 def visible_or_not():
     """Visibilité soit du personnage, soit la matérialisation des os"""
 
@@ -174,7 +172,7 @@ def visible_or_not():
 
 
 def main():
-    gl.frame_number += 1
+
     gl.fps += 1
     if time() - gl.t > 10:
         gl.t = time()
@@ -184,29 +182,13 @@ def main():
 
     keyboard()
 
-    if gl.debug:
-        if gl.nums < len(gl.data):
-            if gl.frame_number < 20:
-                every = 1
-            else:
-                every = gl.every
-            # les datas sans le body
-            data = gl.data[gl.nums][:-1]
-            if gl.frame_number % every == 0:
-                # Les coordonnées xzy de opencv deviennent xyz de blender
-                gl.points = get_points(data)
-                gl.nums += 1
-                gl.new = 1
-        else:
-            print("Le spectacle doit continué")
-
     if gl.points:
+
         set_sphere_position_scale()
         set_cubes_position_orientation_scale()
         set_body_position_orientation()
         set_head_location()  # pour COCO
 
-        gl.new = 0
         gl.points = None
 
     gl.metarig.update()
