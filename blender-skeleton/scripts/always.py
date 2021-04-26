@@ -6,8 +6,7 @@ from bge import logic as gl
 from bge import events
 from mathutils import Vector, Quaternion, Matrix
 
-from scripts.utils import get_all_objects, JOINTS
-from scripts.rs_utils import get_points
+from scripts.utils import JOINTS
 
 
 def apply_objet_position_orientation(objet_point_1, objet_point_2, objet):
@@ -42,18 +41,6 @@ def apply_objet_position_orientation(objet_point_1, objet_point_2, objet):
 
     # Apply position
     objet.worldPosition = objet_point_1.worldPosition
-
-
-def set_sphere_position_scale():
-    for i in range(14):  # gl.nombre):
-        if gl.points[i]:
-            v = Vector(gl.points[i])*gl.scale
-            gl.spheres[i].worldPosition = [ v[0] + gl.left_right,
-                                            v[1] + gl.av_ar,
-                                            v[2] + gl.up_down]
-            gl.spheres[i].worldScale = [1.5*gl.scale,
-                                        1.5*gl.scale,
-                                        1.5*gl.scale]
 
 
 def set_body_position_orientation():
@@ -96,16 +83,6 @@ def set_head_location():
         gl.spheres[19].worldScale  = [1.5*gl.scale, 1.5*gl.scale, 1.5*gl.scale]
 
 
-def set_cubes_position_orientation_scale():
-    """Matérialisation des os par des cubes allongés."""
-
-    for bone, [p1, p2] in gl.pairs.items():
-        bone_cube_obj = gl.all_obj[bone]
-        apply_objet_position_orientation(gl.spheres[p1],
-                                         gl.spheres[p2],
-                                         bone_cube_obj)
-
-
 def keyboard():
 
     if gl.keyboard.events[events.UPARROWKEY] == gl.KX_INPUT_JUST_ACTIVATED:
@@ -145,6 +122,7 @@ def keyboard():
     elif gl.keyboard.events[events.HKEY] == gl.KX_INPUT_JUST_ACTIVATED:
         visible_or_not()
 
+
 def visible_or_not():
     """Visibilité soit du personnage, soit la matérialisation des os"""
 
@@ -171,24 +149,46 @@ def visible_or_not():
         gl.body_visible = 1
 
 
+def set_cubes_position_orientation_scale():
+    """Matérialisation des os par des cubes allongés."""
+
+    for bone, [p1, p2] in gl.pairs.items():
+        bone_cube_obj = gl.all_obj[bone]
+        apply_objet_position_orientation(gl.spheres[p1],
+                                         gl.spheres[p2],
+                                         bone_cube_obj)
+
+
+def set_sphere_position_scale():
+    for i in range(14):  # gl.nombre):
+        if gl.points[i]:
+            v = Vector(gl.points[i])*gl.scale
+            gl.spheres[i].worldPosition = [ v[0] + gl.left_right,
+                                            v[1] + gl.av_ar,
+                                            v[2] + gl.up_down]
+            # Les sphères sont aggrandies pour être mieux vues
+            gl.spheres[i].worldScale = [1.5*gl.scale,
+                                        1.5*gl.scale,
+                                        1.5*gl.scale]
+
+
 def main():
 
     gl.fps += 1
     if time() - gl.t > 10:
         gl.t = time()
-        # #print(int(gl.fps/10))
+        print("FPS =", int(gl.fps/10), "Body n°:", gl.body)
         gl.fps = 0
-        print("Body n°:", gl.body)
 
     keyboard()
 
     if gl.points:
-
+        # #print("Maj")
         set_sphere_position_scale()
         set_cubes_position_orientation_scale()
         set_body_position_orientation()
-        set_head_location()  # pour COCO
-
+        # #set_head_location()
+        # On repasse par ici si nouveaux poins
         gl.points = None
 
     gl.metarig.update()

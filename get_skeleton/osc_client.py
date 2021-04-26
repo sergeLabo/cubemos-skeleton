@@ -21,6 +21,7 @@ class OscClt:
 
         self.client = OSCClient(self.ip, self.port)
 
+
     def send_global_message(self, points3D, bodyId=110):
         """Envoi du point en OSC en 3D
             Liste de n°body puis toutes les coordonnées sans liste de 3
@@ -44,6 +45,7 @@ class OscClt:
         self.all_data.append([msg, time()])
         self.client.send_message(b'/points', msg)
 
+
     def send_mutiples_message(self, points3D, bodyId=110):
         """Envoi d'un message OSC pour chaque point: n = 0 à 17
         point = [x, y, z]
@@ -62,11 +64,15 @@ class OscClt:
                     msg.append(point[i])
                 self.client.send_message(b'/point', msg)
 
+
     def send_msg(self, adress, note):
         self.client.send_message(adress, [note])
 
+
     def save(self):
-        """Enregistrement des messages envoyés pour debug de la réception"""
+        """Enregistrement des messages envoyés pour debug de la réception.
+        Les points sont au format cubemos * 1000
+        """
 
         dt_now = datetime.now()
         dt = dt_now.strftime("%Y_%m_%d_%H_%M")

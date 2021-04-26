@@ -5,9 +5,8 @@ import json
 from oscpy.server import OSCThreadServer
 
 from bge import logic as gl
-from scripts.utils import get_all_objects, add_object
+from scripts.utils import get_all_objects, add_object, get_points_blender
 from scripts.utils import JOINTS, PAIRS_COCO, PAIRS_MPI
-from scripts.rs_utils import Filtre, get_points
 from scripts.sound import EasyAudio
 
 
@@ -20,8 +19,8 @@ def on_points(*args):
     gl.body = args[-1]
     # J'ôte le body
     args = args[:-1]
-
-    gl.points = get_points(args)
+    # Les points reçus sont au format cubemos*1000
+    gl.points = get_points_blender(args)
 
 
 def on_note(i):
@@ -34,8 +33,7 @@ def on_note(i):
 
 def osc_server_init():
     gl.server = OSCThreadServer()
-    gl.server.listen('0.0.0.0', port=8003, default=True)
-
+    gl.server.listen(b'localhost', port=8003, default=True)
 
     # Les callbacks du serveur
     gl.server.default_handler = default_handler

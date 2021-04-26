@@ -144,3 +144,36 @@ PAIRS_MPI = {  "upper_arm.L": [5, 6],
     shoulder.L, upper_arm.L, forearm.L, hand.L, shoulder.R, upper_arm.R,
     forearm.R, hand.R, pelvis.L, pelvis.R, thigh.L, shin.L, thigh.R, shin.R]
 """
+
+
+def get_points_blender(data):
+    """frame_data = list(coordonnées des points empilés d'une frame
+            soit 3*18 items avec:
+            mutipliées par 1000
+            les None sont remplacés par (-1000000, -1000000, -1000000)
+            le numéro du body (dernier de la liste) doit être enlevé
+        Conversion:
+            Les coords sont multipliées par 1000 avant envoi en OSC
+            Permutation de y et z, z est la profondeur pour RS et OpenCV
+            et inversion de l'axe des y en z
+            Conversion de cubemos en blender
+    """
+
+    # Réception de 54=3*18 ou 45=3*15
+    if len(data) == 54 or len(data) == 45:
+        nombre = int(len(data)/3)
+        points = []
+        for i in range(nombre):
+            # Reconstruction par 3
+            val = [ data[(3*i)],
+                    data[(3*i)+1],
+                    data[(3*i)+2]]
+            if val == [-1000000, -1000000, -1000000]:
+                points.append(None)
+            else:
+                # Conversion
+                points.append([val[0]/1000, val[2]/1000, -val[1]/1000])
+    else:
+        points = None
+
+    return points

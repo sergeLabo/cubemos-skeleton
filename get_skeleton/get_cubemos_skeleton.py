@@ -75,7 +75,7 @@ class CubemosSkeleton:
                                                                    median_distance)
                         points_3D[joint_index] = point_3d
 
-            # Envoi en OSC
+            # Envoi en OSC des points cubemos
             if not self.specific_message:
                 self.clt.send_global_message(points_3D, skeleton_id)
             else:

@@ -14,7 +14,7 @@ La documentation sur le Wiki de La Labomedia
 
 * Xubuntu 18.04
 * libboost 1.65
-* Blender 2.79b et BGE pour une visualisation
+* Blender 2.79b et BGE pour une visualisation sur Debian 10
 * oscpy
 * numpy
 * OpenCV python
