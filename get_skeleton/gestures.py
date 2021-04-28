@@ -1,4 +1,5 @@
 
+import sys
 from time import time, sleep
 from json import load
 import numpy as np
@@ -11,8 +12,7 @@ except:
     print("Vous devez installer scipy !")
     SCIPY = False
 
-GESTURES_UP  = {
-                2: (7, 5),
+GESTURES  = {   2: (7, 5),
                 3: (4, 2),
                 0: (13, 10),
                 1: (10, 13),
@@ -20,13 +20,12 @@ GESTURES_UP  = {
                 3: (4, 2),
                 4: (4, 3),
                 5: (7, 6),
-                6: (1, 8)
-                }
+                6: (1, 8) }
 
 K_NOTE = 0.3  # hystérésis des keypoints
-K_ABSURDE = 1
-K_FAR_AWAY = 3
-LISSAGE = 4
+K_ABSURDE = 1  # points trop éloignés par rapport à la frame précédente
+K_FAR_AWAY = 3  # points trop éloignés du centre
+LISSAGE = 3  # moyenne des LISSAGE dernières valeurs
 
 
 class Gestures:
@@ -70,18 +69,32 @@ class Gestures:
                 self.liss[i][j] = [0] * LISSAGE
 
     def add_points(self, points):
-        """points = liste de 18 items, soit [1,2,3] soit None"""
+        """points = liste de 18 items, soit [1,2,3] soit None
+
+        Filtres:
+            Les points ne sont pas supprimés mais remplacés par None
+
+        """
 
         self.points = points
+
+        # Suppression des points trop éloignés par rapport à la frame précédente
         self.delete_absurde()
+
+        # Suppression des points trop éloignés du centre
         self.delete_far_away()
+
+        # Lissage avec moyenne des LISSAGE dernières valeurs
         self.get_lisse_points()
+
+        # Centre, step, application pour notes
         self.get_center()
         self.get_step()
         self.gestures()
 
     def get_lisse_points(self):
-        """trop lourd"""
+        """Pour chaque coordonnées (18*3),
+                moyenne des LISSAGE dernières valeurs"""
         points = self.points
         if points:
             for i in range(18):
@@ -89,7 +102,7 @@ class Gestures:
                     for j in range(3):
                         self.liss[i][j].append(points[i][j])
                         # Si liss rempli, je détruits le 1er
-                        if len(self.liss[i][j]) == 5:
+                        if len(self.liss[i][j]) == LISSAGE + 1:
                             del self.liss[i][j][0]
                 # si pas de point, je ne rajoute rien dans la pile
 
@@ -104,29 +117,6 @@ class Gestures:
                 for k in range(LISSAGE):
                     moy += self.liss[i][j][k]
                 smoothed_points[i][j] = moy / LISSAGE
-
-        self.points = smoothed_points
-
-    def get_smoothed_points(self):
-        """Pas utilisé, trop lourd"""
-        points = self.points
-        if points:
-            for i in range(18):
-                if points[i]:
-                    for j in range(3):  # 3
-                        self.piles[i][j].append(points[i][j])
-                # si pas de point, je ne rajoute rien dans la pile
-
-        smoothed_points = [None]*18
-        for i in range(18):
-            smoothed_points[i] = []
-            for j in range(3):
-                if len(self.piles[i][j]) == 15:
-                    smoothed_pile = savgol_filter(list(self.piles[i][j]), 5, 2)
-                    # #if i == 8:
-                        # #print("\n", self.piles[i])
-                        # #print(smoothed_pile[i])
-                    smoothed_points[i].append(smoothed_pile[-1])
 
         self.points = smoothed_points
 
@@ -155,6 +145,7 @@ class Gestures:
         self.points = points_correct
 
     def delete_far_away(self):
+        """Suppression des points trop éloigné du centre"""
         points_good = []
         for point in self.points:
             if point:
@@ -211,7 +202,7 @@ class Gestures:
         """
         pts = self.points
         if pts:
-            for key, val in GESTURES_UP.items():
+            for key, val in GESTURES.items():
                 p2 = val[0]
                 p1 = val[1]
                 if pts[p1] and pts[p2]:
@@ -231,27 +222,30 @@ class Gestures:
 
 
 def read_json(fichier):
+    """Tous les messages dans une liste dans un json"""
     try:
         with open(fichier) as f:
             data = load(f)
         f.close()
-    except:
-        data = None
-        print("Fichier inexistant ou impossible à lire.")
+    except FileNotFoundError as e:
+        print(e)
+        sys.exit()
     return data
 
 
 def get_points_blender(data):
-    """frame_data = list(coordonnées des points empilés d'une frame
+    """ Récupération des points:
+            frame_data = list(coordonnées des points empilés d'une frame
             soit 3*18 items avec:
             mutipliées par 1000
             les None sont remplacés par (-1000000, -1000000, -1000000)
             le numéro du body (dernier de la liste) doit être enlevé
         Conversion:
+            Conversion de cubemos en blender
             Les coords sont multipliées par 1000 avant envoi en OSC
             Permutation de y et z, z est la profondeur pour RS et OpenCV
             et inversion de l'axe des y en z
-            Conversion de cubemos en blender
+
     """
 
     # Réception de 54=3*18 ou 45=3*15
@@ -275,6 +269,9 @@ def get_points_blender(data):
 
 
 if __name__ == "__main__":
+    """Lecture d'un json avec les messages envoyés d'une capture,
+    filtre, nettoyage, et reenvoi comme si capture en temps réel.
+    """
 
     from osc_client import OscClt
 
@@ -287,6 +284,12 @@ if __name__ == "__main__":
     data = read_json(fichier)
     print("Nombre de data:", len(data))
 
+    depths = []
+    centersx = []
+    centersy = []
+    centersz = []
+    xs = []
+    x = 0
     for i in range(0, len(data), 1):
 
         # Les points dans les json sont au format cubemos*1000
@@ -312,7 +315,15 @@ if __name__ == "__main__":
         # Multiplication par 1000 et sérialisation fait par osc
         clt.send_global_message(points_cubemos)
 
-        sleep(0.03)
+        # Ajout dans les listes pour enregistrement
+        depths.append(gest.depth)
+        centersx.append(gest.center[0])
+        centersy.append(gest.center[1])
+        centersz.append(gest.center[2])
+        xs.append(x)
+        x += 1
+
+        # #sleep(0.065)
         n += 1
         t = time()
         if t - t0 > 10:
@@ -321,3 +332,9 @@ if __name__ == "__main__":
                     "center :", gest.center)
             t0 = t
             n = 0
+
+    np.save('./json/depths.npy', np.asarray(depths))
+    np.save('./json/centersx.npy', np.asarray(centersx))
+    np.save('./json/centersy.npy', np.asarray(centersy))
+    np.save('./json/centersz.npy', np.asarray(centersz))
+    np.save('./json/xs.npy', np.asarray(xs))
