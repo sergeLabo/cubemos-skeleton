@@ -57,9 +57,9 @@ class CubemosSkeleton:
                     low_bound_x = max(0, l)
                     m = int(joints_2D[joint_index].x + math.ceil(kernel/2))
                     upper_bound_x = min(cols - 1, m)
-                    n = int(joints_2D[joint_index].y - math.floor(kernel / 2))
+                    n = int(joints_2D[joint_index].y - math.floor(kernel/2))
                     low_bound_y = max(0, n)
-                    o = int(joints_2D[joint_index].y + math.ceil(kernel / 2))
+                    o = int(joints_2D[joint_index].y + math.ceil(kernel/2))
                     upper_bound_y = min(rows - 1, o)
                     for x in range(low_bound_x, upper_bound_x):
                         for y in range(low_bound_y, upper_bound_y):
@@ -123,7 +123,7 @@ class CubemosSkeleton:
                 continue
 
             # Convert images to numpy arrays
-            depth_image = np.asanyarray(depth.get_data())
+            # #depth_image = np.asanyarray(depth.get_data())
             color_image = np.asanyarray(color.get_data())
 
             # perform inference and update the tracking id

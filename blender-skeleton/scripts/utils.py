@@ -171,7 +171,7 @@ def get_points_blender(data):
             if val == [-1000000, -1000000, -1000000]:
                 points.append(None)
             else:
-                # Conversion
+                # Conversion cubemos vers blender
                 points.append([val[0]/1000, val[2]/1000, -val[1]/1000])
     else:
         points = None

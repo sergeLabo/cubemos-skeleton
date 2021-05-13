@@ -3,14 +3,7 @@ import sys
 from time import time, sleep
 from json import load
 import numpy as np
-from collections import deque
 
-try:
-    from scipy.signal import savgol_filter
-    SCIPY = True
-except:
-    print("Vous devez installer scipy !")
-    SCIPY = False
 
 GESTURES  = {   2: (7, 5),
                 3: (4, 2),
@@ -49,14 +42,6 @@ class Gestures:
         self.points = None
         self.points_old = None
         self.center = [0,0,0]
-
-        # Filtres: toutes les coordonnées sont dans une pile
-        self.piles = []
-        pile_size = 10
-        for i in range(18):
-            self.piles.append([])
-            for j in range(3):
-                self.piles[i].append(deque(maxlen=pile_size))
 
         # Lissage: 18 x 3 x LISSAGE
         self.liss = []
